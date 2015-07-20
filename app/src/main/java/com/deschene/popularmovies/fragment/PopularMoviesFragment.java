@@ -9,16 +9,16 @@ import android.view.ViewGroup;
 import com.deschene.popularmovies.R;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment that displays a gridview of popular movies.
  */
-public class MainActivityFragment extends Fragment {
+public class PopularMoviesFragment extends Fragment {
 
-    public MainActivityFragment() {
+    public PopularMoviesFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+            Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_popular_movies, container, false);
     }
 }

@@ -7,14 +7,17 @@ import android.view.MenuItem;
 
 import com.deschene.popularmovies.R;
 
-public class MainActivity extends AppCompatActivity {
+/**
+ * The main activity for this application. Displays a grid view of popular movies through {@link
+ * com.deschene.popularmovies.fragment.PopularMoviesFragment}.
+ */
+public class PopularMoviesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_popular_movies);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
