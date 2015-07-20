@@ -1,5 +1,12 @@
 <resources>
+
     <string name="app_name">Popular Movies</string>
     <string name="hello_world">Hello world!</string>
+
+    <!-- Activity Titles-->
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Options menu actions -->
     <string name="action_settings">Settings</string>
+
 </resources>
