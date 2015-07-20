@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- REPLACE WITH YOUR API KEY FROM themoviedb. NEVER PUSH CODE WITH A REAL API KEY. -->
+    <!-- REPLACE WITH YOUR API KEY FROM themoviedb -->
     <string name="themoviesdb_api_key">none</string>
-    
+
 </resources>
