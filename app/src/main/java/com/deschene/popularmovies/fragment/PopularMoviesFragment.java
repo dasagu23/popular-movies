@@ -37,15 +37,12 @@ import java.util.ArrayList;
  */
 public class PopularMoviesFragment extends Fragment {
 
+    private static final String STATE_MOVIES = "movies";
+
     private MovieAdapter mMovieAdapter;
+    private Movie[] mMovies;
 
     public PopularMoviesFragment() {
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateMovies();
     }
 
     @Override
@@ -68,7 +65,28 @@ public class PopularMoviesFragment extends Fragment {
             }
         });
 
+        if (savedInstanceState == null) {
+            updateMovies();
+        } else {
+            // load movies from bundle
+            mMovies = (Movie[]) savedInstanceState.getParcelableArray(STATE_MOVIES);
+            if (mMovies != null) {
+                mMovieAdapter.clear();
+                for (Movie movie : mMovies) {
+                    mMovieAdapter.add(movie);
+                }
+                mMovieAdapter.notifyDataSetChanged();
+            }
+        }
+
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArray(STATE_MOVIES, mMovies);
     }
 
     /**
@@ -180,11 +198,13 @@ public class PopularMoviesFragment extends Fragment {
         @Override
         protected void onPostExecute(Movie[] movieData) {
             super.onPostExecute(movieData);
+            mMovies = movieData;
             if (movieData != null) {
                 mMovieAdapter.clear();
                 for (Movie movie : movieData) {
                     mMovieAdapter.add(movie);
                 }
+                mMovieAdapter.notifyDataSetChanged();
             }
         }
     }
