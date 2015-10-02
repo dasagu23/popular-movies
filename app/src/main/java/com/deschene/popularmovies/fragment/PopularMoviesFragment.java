@@ -1,5 +1,6 @@
 package com.deschene.popularmovies.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -9,6 +10,9 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,6 +21,7 @@ import android.widget.TextView;
 
 import com.deschene.popularmovies.R;
 import com.deschene.popularmovies.activity.DetailActivity;
+import com.deschene.popularmovies.activity.SettingsActivity;
 import com.deschene.popularmovies.adapter.MovieAdapter;
 import com.deschene.popularmovies.model.Movie;
 
@@ -37,12 +42,43 @@ import java.util.ArrayList;
  */
 public class PopularMoviesFragment extends Fragment {
 
+    public static final int UPDATE_SETTINGS_REQUEST = 1;
     private static final String STATE_MOVIES = "movies";
 
     private MovieAdapter mMovieAdapter;
     private Movie[] mMovies;
 
     public PopularMoviesFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            startActivityForResult(new Intent(getActivity(), SettingsActivity.class),
+                    UPDATE_SETTINGS_REQUEST);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -80,6 +116,18 @@ public class PopularMoviesFragment extends Fragment {
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == UPDATE_SETTINGS_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                // If the update settings request is ok, refresh movies
+                updateMovies();
+            }
+        }
     }
 
     @Override

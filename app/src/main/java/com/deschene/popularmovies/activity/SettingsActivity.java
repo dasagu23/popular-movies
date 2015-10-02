@@ -30,6 +30,9 @@ public class SettingsActivity extends PreferenceActivity implements
         addPreferencesFromResource(R.xml.pref_general);
 
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_sort_order_key)));
+
+        // Update sort order result is "canceled" until we deliberately change it
+        setResult(RESULT_CANCELED);
     }
 
     @Override
@@ -74,6 +77,8 @@ public class SettingsActivity extends PreferenceActivity implements
             int prefIndex = listPreference.findIndexOfValue(stringValue);
             if (prefIndex >= 0) {
                 preference.setSummary(listPreference.getEntries()[prefIndex]);
+                // Set update result to "OK"
+                setResult(RESULT_OK);
             }
         } else {
             // For other preferences, set the summary to the value's simple string representation.
