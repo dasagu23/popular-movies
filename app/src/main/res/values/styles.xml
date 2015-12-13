@@ -3,6 +3,13 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
+        <item name="colorPrimary">#43ac6a</item>
+        <item name="colorPrimaryDark">#eb5424</item>
     </style>
+
+    <style name="popular_movies_frame" >
+        <item name="android:layout_margin">@dimen/popular_movies_margin</item>
+    </style>
+
 
 </resources>

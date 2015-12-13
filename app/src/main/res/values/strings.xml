@@ -1,5 +1,8 @@
 <resources>
 
+    <string name="content_authority">com.deschene.popularmovies.app</string>
+
+
     <string name="app_name">Popular Movies</string>
 
     <!-- Activity Titles-->
@@ -11,7 +14,6 @@
 
     <string name="popular_movies_sort_by_type_format">Sorting by: %1$s</string>
 
-    <string name="detail_user_rating_format">User Rating: %1$s</string>
-    <string name="detail_release_date_formt">Release Date: %1$s</string>
+    <string name="detail_user_rating_format">%1$s/10</string>
 
 </resources>

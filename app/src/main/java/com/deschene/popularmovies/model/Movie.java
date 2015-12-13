@@ -11,11 +11,14 @@ import android.os.Parcelable;
 public class Movie implements Parcelable {
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
-        public Movie createFromParcel(Parcel in) {
+
+        @Override
+        public Movie createFromParcel(final Parcel in) {
             return new Movie(in);
         }
 
-        public Movie[] newArray(int size) {
+        @Override
+        public Movie[] newArray(final int size) {
             return new Movie[size];
         }
     };
@@ -34,22 +37,35 @@ public class Movie implements Parcelable {
      */
     private static final String sUrlImageSize = "w500/";
 
-    private String mOriginalTitle = null;
-    private String mMoviePosterUrl = null;
-    private String mOverview = null;
-    private String mVoteAverage = null;
-    private String mReleaseDate = null;
+    private final String mId;
+    private final String mOriginalTitle;
+    private final String mMoviePosterUrl;
+    private final String mOverview;
+    private final String mVoteAverage;
+    private final String mReleaseDate;
 
-    public Movie(String mOriginalTitle, String mMoviePosterUrl, String mOverview,
-            String mVoteAverage, String mReleaseDate) {
-        this.mOriginalTitle = mOriginalTitle;
-        this.mMoviePosterUrl = sBaseUrl + sUrlImageSize + mMoviePosterUrl;
-        this.mOverview = mOverview;
-        this.mVoteAverage = mVoteAverage;
-        this.mReleaseDate = mReleaseDate;
+    /**
+     * Constructor.
+     *
+     * @param id themoviedb
+     * @param originalTitle title
+     * @param moviePosterUrl poster URL
+     * @param overview overview
+     * @param voteAverage vote average
+     * @param releaseDate release dat
+     */
+    public Movie(final String id, final String originalTitle, final String moviePosterUrl,
+            final String overview, final String voteAverage, final String releaseDate) {
+        mId = id;
+        mOriginalTitle = originalTitle;
+        mMoviePosterUrl = sBaseUrl + sUrlImageSize + moviePosterUrl;
+        mOverview = overview;
+        mVoteAverage = voteAverage;
+        mReleaseDate = releaseDate;
     }
 
-    private Movie(Parcel in) {
+    private Movie(final Parcel in) {
+        mId = in.readString();
         mOriginalTitle = in.readString();
         mMoviePosterUrl = in.readString();
         mOverview = in.readString();
@@ -58,7 +74,8 @@ public class Movie implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(final Parcel dest, final int flags) {
+        dest.writeString(mId);
         dest.writeString(mOriginalTitle);
         dest.writeString(mMoviePosterUrl);
         dest.writeString(mOverview);
@@ -66,24 +83,48 @@ public class Movie implements Parcelable {
         dest.writeString(mReleaseDate);
     }
 
+    /**
+     * @return the movie's themoviedb id.
+     */
+    public String getId() {
+        return mId;
+    }
+
+    /**
+     * @return original title.
+     */
     public String getOriginalTitle() {
         return mOriginalTitle;
     }
 
+    /**
+     * @return poster URL.
+     */
     public String getMoviePosterUrl() {
         return mMoviePosterUrl;
     }
 
+    /**
+     * @return overview.
+     */
     public String getOverview() {
         return mOverview;
     }
 
+    /**
+     * @return vote average.
+     */
     public String getVoteAverage() {
         return mVoteAverage;
     }
 
-    public String getReleaseDate() {
-        return mReleaseDate;
+    /**
+     * @param yearFormat if true
+     * @return release date.
+     */
+    public String getReleaseDate(final boolean yearFormat) {
+
+        return yearFormat ? mReleaseDate.substring(0, 4) : mReleaseDate;
     }
 
     @Override

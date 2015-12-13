@@ -19,9 +19,9 @@ import java.util.List;
  */
 public class MovieAdapter extends ArrayAdapter<Movie> {
 
-    private Context mContext;
-    private int mResourceId;
-    private List<Movie> mMovies;
+    private final Context mContext;
+    private final int mResourceId;
+    private final List<Movie> mMovies;
 
     /**
      * Constructor.
@@ -30,7 +30,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
      * @param resource the resource id of the layout for each view
      * @param movies the list of movies
      */
-    public MovieAdapter(Context context, int resource, ArrayList<Movie> movies) {
+    public MovieAdapter(final Context context, final int resource, final ArrayList<Movie> movies) {
         super(context, resource, movies);
         mContext = context;
         mResourceId = resource;
@@ -43,17 +43,17 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
     }
 
     @Override
-    public Movie getItem(int position) {
+    public Movie getItem(final int position) {
         return mMovies.get(position);
     }
 
     @Override
-    public long getItemId(int position) {
+    public long getItemId(final int position) {
         return position;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, final ViewGroup parent) {
         final Movie movie = mMovies.get(position);
 
         if (convertView == null) {

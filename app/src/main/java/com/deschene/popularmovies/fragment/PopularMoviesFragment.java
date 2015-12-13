@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,34 +43,42 @@ import java.util.ArrayList;
  */
 public class PopularMoviesFragment extends Fragment {
 
+    /**
+     * Request code for onActivityResult. Tells this fragment to update the movie from the server
+     * due to a settings change.
+     */
     public static final int UPDATE_SETTINGS_REQUEST = 1;
+
     private static final String STATE_MOVIES = "movies";
 
     private MovieAdapter mMovieAdapter;
     private Movie[] mMovies;
 
+    /**
+     * Empty constructor for system fragment creation.
+     */
     public PopularMoviesFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        final int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -82,8 +91,8 @@ public class PopularMoviesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+            final Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_popular_movies, container, false);
 
         mMovieAdapter =
@@ -93,7 +102,8 @@ public class PopularMoviesFragment extends Fragment {
         gridView.setAdapter(mMovieAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(final AdapterView<?> parent, final View view,
+                    final int position, final long id) {
                 final Movie movie = mMovieAdapter.getItem(position);
                 final Intent intent = new Intent(getActivity(), DetailActivity.class);
                 intent.putExtra(Movie.EXTRA_MOVIE, movie);
@@ -108,7 +118,7 @@ public class PopularMoviesFragment extends Fragment {
             mMovies = (Movie[]) savedInstanceState.getParcelableArray(STATE_MOVIES);
             if (mMovies != null) {
                 mMovieAdapter.clear();
-                for (Movie movie : mMovies) {
+                for (final Movie movie : mMovies) {
                     mMovieAdapter.add(movie);
                 }
                 mMovieAdapter.notifyDataSetChanged();
@@ -119,7 +129,7 @@ public class PopularMoviesFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == UPDATE_SETTINGS_REQUEST) {
@@ -131,7 +141,7 @@ public class PopularMoviesFragment extends Fragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArray(STATE_MOVIES, mMovies);
@@ -147,7 +157,8 @@ public class PopularMoviesFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortType = prefs.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_default));
         sortType = sortType.equals(getString(R.string.pref_sort_order_highest_rated_value)) ?
@@ -166,7 +177,7 @@ public class PopularMoviesFragment extends Fragment {
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         @Override
-        protected Movie[] doInBackground(String... params) {
+        protected Movie[] doInBackground(final String... params) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -176,25 +187,25 @@ public class PopularMoviesFragment extends Fragment {
             String moviesJsonStr = null;
 
             try {
-                final SharedPreferences
-                        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                final SharedPreferences prefs =
+                        PreferenceManager.getDefaultSharedPreferences(getActivity());
                 final String pref = prefs.getString(getString(R.string.pref_sort_order_key),
                         getString(R.string.pref_sort_order_default));
 
-                Uri.Builder builder = new Uri.Builder();
+                final Uri.Builder builder = new Uri.Builder();
                 builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
                         .appendPath("discover").appendPath("movie")
                         .appendQueryParameter("sort_by", pref)
                         .appendQueryParameter("api_key", params[0]);
 
-                URL url = new URL(builder.toString());
+                final URL url = new URL(builder.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
 
                 // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
+                final InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
                     // Nothing to do.
@@ -215,7 +226,7 @@ public class PopularMoviesFragment extends Fragment {
                     return null;
                 }
                 moviesJsonStr = buffer.toString();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // Can't parse data if it wasn't successfully retrieved.
                 return null;
@@ -234,9 +245,8 @@ public class PopularMoviesFragment extends Fragment {
 
             try {
                 return getMovieDataFromJson(moviesJsonStr);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
             }
 
             // THIS WILL HAPPEN ONLY IF THERE IS AN ERROR IN THE JSON
@@ -244,12 +254,12 @@ public class PopularMoviesFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Movie[] movieData) {
+        protected void onPostExecute(final Movie[] movieData) {
             super.onPostExecute(movieData);
             mMovies = movieData;
             if (movieData != null) {
                 mMovieAdapter.clear();
-                for (Movie movie : movieData) {
+                for (final Movie movie : movieData) {
                     mMovieAdapter.add(movie);
                 }
                 mMovieAdapter.notifyDataSetChanged();
@@ -257,6 +267,13 @@ public class PopularMoviesFragment extends Fragment {
         }
     }
 
+    /**
+     * Converts the json string of movie data to an array of movies.
+     *
+     * @param moviesJsonStr the string of json
+     * @return an array of {@link Movie}
+     * @throws JSONException if parsing string fails
+     */
     public Movie[] getMovieDataFromJson(final String moviesJsonStr) throws JSONException {
         // These are the names of the JSON objects that need to be extracted.
         final String OWM_RESULTS = "results";
@@ -265,16 +282,18 @@ public class PopularMoviesFragment extends Fragment {
         final String OWM_OVERVIEW = "overview";
         final String OWM_VOTE_AVERAGE = "vote_average";
         final String OWM_RELEASE_DATE = "release_date";
+        final String OWM_ID = "id";
 
-        JSONObject moviesJson = new JSONObject(moviesJsonStr);
-        JSONArray moviesArray = moviesJson.getJSONArray(OWM_RESULTS);
+        final JSONObject moviesJson = new JSONObject(moviesJsonStr);
+        final JSONArray moviesArray = moviesJson.getJSONArray(OWM_RESULTS);
 
-        Movie[] movies = new Movie[moviesArray.length()];
+        final Movie[] movies = new Movie[moviesArray.length()];
 
         for (int i = 0; i < moviesArray.length(); i++) {
-            JSONObject movieObject = moviesArray.getJSONObject(i);
+            final JSONObject movieObject = moviesArray.getJSONObject(i);
 
-            movies[i] = new Movie(movieObject.getString(OWM_ORIGINAL_TITLE),
+            movies[i] = new Movie(movieObject.getString(OWM_ID),
+                    movieObject.getString(OWM_ORIGINAL_TITLE),
                     movieObject.getString(OWM_POSTER_URL), movieObject.getString(OWM_OVERVIEW),
                     movieObject.getString(OWM_VOTE_AVERAGE),
                     movieObject.getString(OWM_RELEASE_DATE));
