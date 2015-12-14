@@ -69,10 +69,50 @@
                         tools:text="User Rating: 7.0/10" />
 
                     <Switch
+                        android:id="@+id/favorite_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Mark as Favorite" />
                 </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/detail_movie_plot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                tools:text="Talk about an unforgettable roller coaster ride of a movie. Dinosaurs, taking tests, trying to pass the GRE to get into college. Zany family fun." />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:id="@+id/trailers_frame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@string/roboto_light"
+                    android:text="@string/trailers_title"
+                    android:textSize="22sp" />
+
+                <ProgressBar
+                    android:id="@+id/trailer_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:indeterminate="true" />
+
+                <ListView
+                    android:id="@+id/trailer_list_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
             </LinearLayout>
 
             <View
@@ -82,12 +122,29 @@
                 android:layout_marginTop="8dp"
                 android:background="@android:color/darker_gray" />
 
-            <TextView
-                android:id="@+id/detail_movie_plot"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/reviews_frame"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                tools:text="Talk about an unforgettable roller coaster ride of a movie. Dinosaurs, taking tests, trying to pass the GRE to get into college. Zany family fun." />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@string/roboto_light"
+                    android:text="@string/reviews_title"
+                    android:textSize="22sp" />
+
+                <ProgressBar
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:indeterminate="true" />
+
+                <View
+                    android:id="@+id/review"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -24,6 +24,7 @@ public class PopularMoviesActivity extends AppCompatActivity {
                 .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this)).build());
 
         // todo remove
-        Cursor cursor = getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, null);
+        final Cursor cursor = getContentResolver()
+                .query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, null);
     }
 }
