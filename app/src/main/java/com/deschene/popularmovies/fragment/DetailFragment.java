@@ -160,8 +160,8 @@ public class DetailFragment extends Fragment {
     }
 
     private void fetchReviews() {
-//        new FetchMovieReviewsTask()
-//                .execute(mMovie.getId(), "reviews", getString(R.string.themoviesdb_api_key));
+        new FetchMovieReviewsTask()
+                .execute(mMovie.getId(), getString(R.string.themoviesdb_api_key));
     }
 
     /**

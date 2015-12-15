@@ -103,7 +103,7 @@ public class AbsractFetchReviewsTask extends AsyncTask<String, Void, String[]> {
     public String[] getDataFromJson(final String trailersJsonStr) throws JSONException {
         // These are the names of the JSON objects that need to be extracted.
         final String OWM_RESULTS = "results";
-        final String OWM_KEY = "key";
+        final String OWM_KEY = "content";
 
         final JSONObject trailersJson = new JSONObject(trailersJsonStr);
         final JSONArray trailersArray = trailersJson.getJSONArray(OWM_RESULTS);
