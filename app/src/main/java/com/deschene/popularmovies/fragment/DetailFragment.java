@@ -32,12 +32,22 @@ import com.squareup.picasso.Picasso;
  */
 public class DetailFragment extends Fragment {
 
+    private static final String ARG_MOVIE = DetailFragment.class.getSimpleName() + "movie";
+
     private Switch mFavoriteSwitch;
     private Movie mMovie;
-    private String[] mTrailers;
     private String[] mReviews;
-    private TrailerAdapter mTrailerAdapter;
+    private String[] mTrailers;
     private ReviewAdapter mReviewAdapter;
+    private TrailerAdapter mTrailerAdapter;
+
+    public static DetailFragment newInstance(final Movie movie) {
+        final DetailFragment fragment = new DetailFragment();
+        final Bundle args = new Bundle();
+        args.putParcelable(ARG_MOVIE, movie);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     /**
      * Empty constructor for system creation.
@@ -47,26 +57,28 @@ public class DetailFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Bundle args = getArguments();
+        mMovie = args.getParcelable(ARG_MOVIE);
+    }
+
+    @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        final Intent intent = getActivity().getIntent();
-        if (intent != null && intent.hasExtra(Movie.EXTRA_MOVIE)) {
-            mMovie = intent.getParcelableExtra(Movie.EXTRA_MOVIE);
-            ((TextView) rootView.findViewById(R.id.detail_movie_title))
-                    .setText(mMovie.getOriginalTitle());
-            ((TextView) rootView.findViewById(R.id.detail_movie_plot))
-                    .setText(mMovie.getOverview());
-            final String userRating = String.format(getString(R.string.detail_user_rating_format),
-                    mMovie.getVoteAverage());
-            ((TextView) rootView.findViewById(R.id.detail_movie_user_rating)).setText(userRating);
-            final String releaseDate = mMovie.getReleaseDate(true);
-            ((TextView) rootView.findViewById(R.id.detail_movie_release_date)).setText(releaseDate);
-            final ImageView posterImage =
-                    (ImageView) rootView.findViewById(R.id.detail_poster_image_view);
-            Picasso.with(getActivity()).load(mMovie.getMoviePosterUrl()).into(posterImage);
-        }
+        ((TextView) rootView.findViewById(R.id.detail_movie_title))
+                .setText(mMovie.getOriginalTitle());
+        ((TextView) rootView.findViewById(R.id.detail_movie_plot)).setText(mMovie.getOverview());
+        final String userRating = String.format(getString(R.string.detail_user_rating_format),
+                mMovie.getVoteAverage());
+        ((TextView) rootView.findViewById(R.id.detail_movie_user_rating)).setText(userRating);
+        final String releaseDate = mMovie.getReleaseDate(true);
+        ((TextView) rootView.findViewById(R.id.detail_movie_release_date)).setText(releaseDate);
+        final ImageView posterImage =
+                (ImageView) rootView.findViewById(R.id.detail_poster_image_view);
+        Picasso.with(getActivity()).load(mMovie.getMoviePosterUrl()).into(posterImage);
 
         if (savedInstanceState == null) {
             fetchTrailers();
@@ -199,7 +211,7 @@ public class DetailFragment extends Fragment {
             super.onPostExecute(null);
 
             mReviews = data;
-             onReviewsLoaded();
+            onReviewsLoaded();
         }
     }
 }

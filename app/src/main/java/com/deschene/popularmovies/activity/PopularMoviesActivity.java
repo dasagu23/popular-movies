@@ -52,7 +52,7 @@ public class PopularMoviesActivity extends AppCompatActivity
             //                    .commit();
         } else {
             final Intent intent = new Intent(this, DetailActivity.class);
-            intent.putExtra(Movie.EXTRA_MOVIE, movie);
+            intent.putExtra(DetailActivity.EXTRA_MOVIE, movie);
             startActivity(intent);
         }
     }

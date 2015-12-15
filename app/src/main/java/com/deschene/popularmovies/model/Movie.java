@@ -24,11 +24,6 @@ public class Movie implements Parcelable {
     };
 
     /**
-     * Tag for passing as a parcelable
-     */
-    public static final String EXTRA_MOVIE = "extra_movie";
-
-    /**
      * Base URL for movie poster request
      */
     private static final String sBaseUrl = "http://image.tmdb.org/t/p/";
