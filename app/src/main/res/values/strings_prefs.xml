@@ -1,5 +1,8 @@
 <resources>
 
+    <!-- Sesssion id -->
+    <string name="pref_session_id_key">session_id</string>
+
     <!-- Sort Order Preference -->
     <string name="pref_sort_order_title">Sort movies by:</string>
     <string name="pref_sort_order_key">sort_order</string>
