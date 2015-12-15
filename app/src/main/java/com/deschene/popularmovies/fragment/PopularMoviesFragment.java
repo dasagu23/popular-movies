@@ -21,7 +21,6 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import com.deschene.popularmovies.R;
-import com.deschene.popularmovies.activity.DetailActivity;
 import com.deschene.popularmovies.activity.SettingsActivity;
 import com.deschene.popularmovies.adapter.MovieAdapter;
 import com.deschene.popularmovies.model.Movie;
@@ -58,6 +57,13 @@ public class PopularMoviesFragment extends Fragment {
      * Empty constructor for system fragment creation.
      */
     public PopularMoviesFragment() {
+    }
+
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Movie movie);
     }
 
     @Override
@@ -105,9 +111,7 @@ public class PopularMoviesFragment extends Fragment {
             public void onItemClick(final AdapterView<?> parent, final View view,
                     final int position, final long id) {
                 final Movie movie = mMovieAdapter.getItem(position);
-                final Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra(Movie.EXTRA_MOVIE, movie);
-                startActivity(intent);
+                ((Callback) getActivity()).onItemSelected(movie);
             }
         });
 
