@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.deschene.popularmovies.R;
+import com.deschene.popularmovies.fragment.DetailFragment;
 import com.deschene.popularmovies.fragment.PopularMoviesFragment;
 import com.deschene.popularmovies.model.Movie;
 import com.facebook.stetho.Stetho;
@@ -16,7 +17,6 @@ import com.facebook.stetho.Stetho;
 public class PopularMoviesActivity extends AppCompatActivity
         implements PopularMoviesFragment.Callback {
 
-    private static final String DETAIL_FRAGMENT_TAG = "DFTAG";
     private boolean mTwoPane;
 
     @Override
@@ -40,16 +40,10 @@ public class PopularMoviesActivity extends AppCompatActivity
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
-            //            Bundle args = new Bundle();
-            //            args.putParcelable(DetailFragment.DETAIL_URI, contentUri);
-
-            //            DetailFragment fragment = new DetailFragment();
-            //            fragment.setArguments(args);
-
-            //            getSupportFragmentManager().beginTransaction()
-            //                    .replace(R.id.weather_detail_container, fragment,
-            // DETAILFRAGMENT_TAG)
-            //                    .commit();
+            final DetailFragment fragment = DetailFragment.newInstance(movie);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_container, fragment, DetailFragment.class.getSimpleName())
+                    .commit();
         } else {
             final Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra(DetailActivity.EXTRA_MOVIE, movie);
