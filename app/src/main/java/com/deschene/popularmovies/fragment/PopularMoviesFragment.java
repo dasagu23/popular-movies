@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -50,6 +51,7 @@ public class PopularMoviesFragment extends Fragment {
 
     private static final String STATE_MOVIES = "movies";
 
+    private URL mMoviesRequestUrl;
     private MovieAdapter mMovieAdapter;
     private Movie[] mMovies;
 
@@ -59,9 +61,15 @@ public class PopularMoviesFragment extends Fragment {
     public PopularMoviesFragment() {
     }
 
+    /**
+     * DetailFragmentCallback for when an item has been selected.
+     */
     public interface Callback {
+
         /**
-         * DetailFragmentCallback for when an item has been selected.
+         * Called when an item is selected in the gridview
+         *
+         * @param movie the selected movie
          */
         public void onItemSelected(Movie movie);
     }
@@ -155,7 +163,38 @@ public class PopularMoviesFragment extends Fragment {
      * Starts the request to update the movies in the db.
      */
     private void updateMovies() {
-        new FetchMoviesTask().execute(getString(R.string.themoviesdb_api_key));
+        final SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String sortType = prefs.getString(getString(R.string.pref_sort_order_key),
+                getString(R.string.pref_sort_order_default));
+        final String sessionId = prefs.getString(getString(R.string.pref_session_id_key), null);
+
+        final Uri.Builder builder = new Uri.Builder();
+        final String apiKey = getString(R.string.themoviesdb_api_key);
+        try {
+            if (sortType.equals(getString(R.string.pref_sort_order_most_popular_value)) ||
+                    sortType.equals(getString(R.string.pref_sort_order_highest_rated_value))) {
+                // sort by most popular
+                builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
+                        .appendPath("discover").appendPath("movie")
+                        .appendQueryParameter("sort_by", sortType)
+                        .appendQueryParameter("api_key", apiKey);
+                // sort by highest rated
+            } else if ((sessionId != null) &&
+                    sortType.equals(getString(R.string.pref_sort_order_favorite_value))) {
+                // sort by favorites
+                builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
+                        .appendPath("account").appendPath(apiKey).appendPath("favorite")
+                        .appendPath("movies").appendQueryParameter("sort_by", sortType)
+                        .appendQueryParameter("api_key", apiKey)
+                        .appendQueryParameter("session_id", sessionId);
+            }
+
+            mMoviesRequestUrl = new URL(builder.toString());
+            new FetchMoviesTask().execute(getString(R.string.themoviesdb_api_key));
+        } catch (final MalformedURLException e) {
+            Log.e("Malformed URL: ", e.getMessage());
+        }
     }
 
     @Override
@@ -191,18 +230,7 @@ public class PopularMoviesFragment extends Fragment {
             String moviesJsonStr = null;
 
             try {
-                final SharedPreferences prefs =
-                        PreferenceManager.getDefaultSharedPreferences(getActivity());
-                final String pref = prefs.getString(getString(R.string.pref_sort_order_key),
-                        getString(R.string.pref_sort_order_default));
-
-                final Uri.Builder builder = new Uri.Builder();
-                builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
-                        .appendPath("discover").appendPath("movie")
-                        .appendQueryParameter("sort_by", pref)
-                        .appendQueryParameter("api_key", params[0]);
-
-                final URL url = new URL(builder.toString());
+                final URL url = mMoviesRequestUrl;
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
