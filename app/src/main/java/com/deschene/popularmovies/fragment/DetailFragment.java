@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.deschene.popularmovies.R;
+import com.deschene.popularmovies.adapter.ReviewAdapter;
 import com.deschene.popularmovies.adapter.TrailerAdapter;
 import com.deschene.popularmovies.data.MoviesContract;
 import com.deschene.popularmovies.model.Movie;
@@ -36,6 +37,7 @@ public class DetailFragment extends Fragment {
     private String[] mTrailers;
     private String[] mReviews;
     private TrailerAdapter mTrailerAdapter;
+    private ReviewAdapter mReviewAdapter;
 
     /**
      * Empty constructor for system creation.
@@ -69,7 +71,6 @@ public class DetailFragment extends Fragment {
         if (savedInstanceState == null) {
             fetchTrailers();
             fetchReviews();
-            //            fetchReviews();
         }
 
         return rootView;
@@ -137,6 +138,16 @@ public class DetailFragment extends Fragment {
     /**
      * Initialize trailers ListView.
      */
+    private void onReviewsLoaded() {
+        getView().findViewById(R.id.reviews_progress).setVisibility(View.GONE);
+        final ListView reviewsList = (ListView) getView().findViewById(R.id.review_list_view);
+        mReviewAdapter = new ReviewAdapter(getActivity(), mReviews);
+        reviewsList.setAdapter(mReviewAdapter);
+    }
+
+    /**
+     * Initialize trailers ListView.
+     */
     private void onTrailersLoaded() {
         getView().findViewById(R.id.trailer_progress).setVisibility(View.GONE);
         final ListView trailerList = (ListView) getView().findViewById(R.id.trailer_list_view);
@@ -188,7 +199,7 @@ public class DetailFragment extends Fragment {
             super.onPostExecute(null);
 
             mReviews = data;
-            // onReviewsLoaded();
+             onReviewsLoaded();
         }
     }
 }

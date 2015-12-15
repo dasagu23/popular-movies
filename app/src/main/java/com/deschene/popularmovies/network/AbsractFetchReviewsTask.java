@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * AsyncTask for fetching movie reviews and trailers.
+ * AsyncTask for fetching movie reviews.
  */
 public class AbsractFetchReviewsTask extends AsyncTask<String, Void, String[]> {
 
@@ -94,28 +94,28 @@ public class AbsractFetchReviewsTask extends AsyncTask<String, Void, String[]> {
     }
 
     /**
-     * Converts the json string of movie data to an array of String trailers.
+     * Converts the json string of movie data to an array of String reviews.
      *
-     * @param trailersJsonStr the string of json
-     * @return a String array of trailers
+     * @param reviewsJsonStr the string of json
+     * @return a String array of reviews
      * @throws JSONException if parsing string fails
      */
-    public String[] getDataFromJson(final String trailersJsonStr) throws JSONException {
+    public String[] getDataFromJson(final String reviewsJsonStr) throws JSONException {
         // These are the names of the JSON objects that need to be extracted.
         final String OWM_RESULTS = "results";
         final String OWM_KEY = "content";
 
-        final JSONObject trailersJson = new JSONObject(trailersJsonStr);
-        final JSONArray trailersArray = trailersJson.getJSONArray(OWM_RESULTS);
+        final JSONObject reviewsJson = new JSONObject(reviewsJsonStr);
+        final JSONArray reviewsArray = reviewsJson.getJSONArray(OWM_RESULTS);
 
-        final String[] trailers = new String[trailersArray.length()];
+        final String[] reviews = new String[reviewsArray.length()];
 
-        for (int i = 0; i < trailersArray.length(); i++) {
-            final JSONObject movieObject = trailersArray.getJSONObject(i);
+        for (int i = 0; i < reviewsArray.length(); i++) {
+            final JSONObject movieObject = reviewsArray.getJSONObject(i);
 
-            trailers[i] = movieObject.getString(OWM_KEY);
+            reviews[i] = movieObject.getString(OWM_KEY);
         }
 
-        return trailers;
+        return reviews;
     }
 }

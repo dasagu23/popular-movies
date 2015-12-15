@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.deschene.popularmovies.activity.DetailActivity$DetailFragment">
+    tools:context="com.deschene.popularmovies.fragment.DetailFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -136,14 +136,15 @@
                     android:textSize="22sp" />
 
                 <ProgressBar
+                    android:id="@+id/reviews_progress"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:indeterminate="true" />
 
-                <View
-                    android:id="@+id/review"
+                <ListView
+                    android:id="@+id/review_list_view"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

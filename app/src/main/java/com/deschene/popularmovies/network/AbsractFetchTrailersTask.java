@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * AsyncTask for fetching movie reviews and trailers.
+ * AsyncTask for fetching movie trailers.
  */
 public class AbsractFetchTrailersTask extends AsyncTask<String, Void, String[]> {
 
