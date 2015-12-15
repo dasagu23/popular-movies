@@ -2,11 +2,15 @@ package com.deschene.popularmovies.fragment;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.deschene.popularmovies.R;
 import com.deschene.popularmovies.adapter.ReviewAdapter;
@@ -26,6 +29,16 @@ import com.deschene.popularmovies.model.Movie;
 import com.deschene.popularmovies.network.AbsractFetchReviewsTask;
 import com.deschene.popularmovies.network.AbsractFetchTrailersTask;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -109,34 +122,7 @@ public class DetailFragment extends Fragment {
             public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
                 if (isChecked) {
                     // save to database if it's not there
-                    final long movieId = Long.parseLong(mMovie.getId());
-                    final Uri movieUri = MoviesContract.MovieEntry.buildMoviesUri(movieId);
-                    final Cursor cursor = getActivity().getContentResolver()
-                            .query(movieUri, null, null, null, null);
-                    if (cursor != null) {
-
-                        if (!cursor.moveToFirst()) {
-                            // nothing in database, add it
-                            final ContentValues movieValues = new ContentValues();
-
-                            movieValues.put(MoviesContract.MovieEntry.COLUMN_ID, mMovie.getId());
-                            movieValues.put(MoviesContract.MovieEntry.COLUMN_TITLE,
-                                    mMovie.getOriginalTitle());
-                            movieValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW,
-                                    mMovie.getOverview());
-                            movieValues.put(MoviesContract.MovieEntry.COLUMN_POSTER_URL,
-                                    mMovie.getMoviePosterUrl());
-                            movieValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE,
-                                    mMovie.getReleaseDate(false));
-                            movieValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE,
-                                    mMovie.getVoteAverage());
-
-                            getActivity().getContentResolver()
-                                    .insert(MoviesContract.MovieEntry.CONTENT_URI, movieValues);
-                        }
-                        cursor.close();
-                    }
-                    Toast.makeText(getActivity(), "Yo", Toast.LENGTH_LONG).show();
+                    cacheMovie();
                 } else {
                     // remove from database
                     getActivity().getContentResolver().delete(MoviesContract.MovieEntry.CONTENT_URI,
@@ -145,6 +131,127 @@ public class DetailFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public class UpdateFavoriteTask extends AsyncTask<Boolean, Void, String[]> {
+
+        private final String LOG_TAG = UpdateFavoriteTask.class.getSimpleName();
+
+        @Override
+        protected String[] doInBackground(final Boolean... params) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            final SharedPreferences prefs =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
+            final String sessionId = prefs.getString(getString(R.string.pref_session_id_key), null);
+            final String apiKey = getString(R.string.themoviesdb_api_key);
+
+            final String jsonFromServer;
+            try {
+
+                // Build json object
+                final JSONObject object = new JSONObject();
+                object.put("media_type", "movie");
+                object.put("media_id", mMovie.getId());
+                final boolean favorite = params[0];
+                object.put("favorite", favorite);
+
+                final Uri.Builder builder = new Uri.Builder();
+                builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
+                        .appendPath("account").appendPath(mMovie.getId()).appendPath("favorite")
+                        .appendQueryParameter("api_key", apiKey)
+                        .appendQueryParameter("session_id", sessionId);
+
+                final URL url = new URL(builder.toString());
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                final InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                jsonFromServer = buffer.toString();
+            } catch (final IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // Can't parse data if it wasn't successfully retrieved.
+                return null;
+            } catch (final JSONException e) {
+                // do something
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+
+//            try {
+//                return getDataFromJson(jsonFromServer);
+//            } catch (final JSONException e) {
+//                Log.e(LOG_TAG, e.getMessage(), e);
+//            }
+
+            return null;
+        }
+    }
+
+    /**
+     * Caches the movie in the database
+     */
+    private void cacheMovie() {
+        final long movieId = Long.parseLong(mMovie.getId());
+        final Uri movieUri = MoviesContract.MovieEntry.buildMoviesUri(movieId);
+        final Cursor cursor = getActivity().getContentResolver()
+                .query(movieUri, null, null, null, null);
+        if (cursor != null) {
+
+            if (!cursor.moveToFirst()) {
+                // nothing in database, add it
+                final ContentValues movieValues = new ContentValues();
+
+                movieValues.put(MoviesContract.MovieEntry.COLUMN_ID, mMovie.getId());
+                movieValues.put(MoviesContract.MovieEntry.COLUMN_TITLE,
+                        mMovie.getOriginalTitle());
+                movieValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW,
+                        mMovie.getOverview());
+                movieValues.put(MoviesContract.MovieEntry.COLUMN_POSTER_URL,
+                        mMovie.getMoviePosterUrl());
+                movieValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE,
+                        mMovie.getReleaseDate(false));
+                movieValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+                        mMovie.getVoteAverage());
+
+                getActivity().getContentResolver()
+                        .insert(MoviesContract.MovieEntry.CONTENT_URI, movieValues);
+            }
+            cursor.close();
+        }
     }
 
     /**
