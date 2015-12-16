@@ -1,8 +1,10 @@
 package com.deschene.popularmovies.fragment;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import com.deschene.popularmovies.R;
 import com.deschene.popularmovies.activity.SettingsActivity;
 import com.deschene.popularmovies.adapter.MovieAdapter;
+import com.deschene.popularmovies.data.MoviesContract;
 import com.deschene.popularmovies.model.Movie;
 
 import org.json.JSONArray;
@@ -71,7 +74,7 @@ public class PopularMoviesFragment extends Fragment {
          *
          * @param movie the selected movie
          */
-        public void onItemSelected(Movie movie);
+        void onItemSelected(Movie movie);
     }
 
     @Override
@@ -167,33 +170,68 @@ public class PopularMoviesFragment extends Fragment {
                 PreferenceManager.getDefaultSharedPreferences(getActivity());
         final String sortType = prefs.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_default));
-        final String sessionId = prefs.getString(getString(R.string.pref_session_id_key), null);
 
         final Uri.Builder builder = new Uri.Builder();
         final String apiKey = getString(R.string.themoviesdb_api_key);
         try {
             if (sortType.equals(getString(R.string.pref_sort_order_most_popular_value)) ||
                     sortType.equals(getString(R.string.pref_sort_order_highest_rated_value))) {
-                // sort by most popular
+                // sort by most popular/highest rated
                 builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
                         .appendPath("discover").appendPath("movie")
                         .appendQueryParameter("sort_by", sortType)
                         .appendQueryParameter("api_key", apiKey);
-                // sort by highest rated
-            } else if ((sessionId != null) &&
-                    sortType.equals(getString(R.string.pref_sort_order_favorite_value))) {
+                new FetchMoviesTask().execute(getString(R.string.themoviesdb_api_key));
+            } else if (sortType.equals(getString(R.string.pref_sort_order_favorite_value))) {
                 // sort by favorites
-                builder.scheme("https").authority("api.themoviedb.org").appendPath("3")
-                        .appendPath("account").appendPath(apiKey).appendPath("favorite")
-                        .appendPath("movies").appendQueryParameter("sort_by", sortType)
-                        .appendQueryParameter("api_key", apiKey)
-                        .appendQueryParameter("session_id", sessionId);
+                loadFavoriteMovies();
             }
 
             mMoviesRequestUrl = new URL(builder.toString());
-            new FetchMoviesTask().execute(getString(R.string.themoviesdb_api_key));
         } catch (final MalformedURLException e) {
             Log.e("Malformed URL: ", e.getMessage());
+        }
+    }
+
+    private void loadFavoriteMovies() {
+        final ContentResolver resolver = getActivity().getContentResolver();
+        final Cursor cursor =
+                resolver.query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, null);
+
+        final int COLUMN_ID = cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_ID);
+        final int COLUMN_OVERVIEW =
+                cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_OVERVIEW);
+        final int COLUMN_POSTER_URL =
+                cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_URL);
+        final int COLUMN_RELESE_DATE =
+                cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE);
+        final int COLUMN_TITLE = cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE);
+        final int COLUMN_VOTE_AVERAGE =
+                cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE);
+
+        if (cursor.moveToFirst()) {
+            final Movie[] movies = new Movie[cursor.getCount()];
+            int count = 0;
+            while (!cursor.isAfterLast()) {
+
+                final Movie movie =
+                        new Movie(cursor.getString(COLUMN_ID), cursor.getString(COLUMN_TITLE),
+                                cursor.getString(COLUMN_POSTER_URL),
+                                cursor.getString(COLUMN_OVERVIEW),
+                                cursor.getString(COLUMN_VOTE_AVERAGE),
+                                cursor.getString(COLUMN_RELESE_DATE));
+                movies[count] = movie;
+                count++;
+                cursor.moveToNext();
+            }
+            cursor.close();
+
+            mMovies = movies;
+            mMovieAdapter.clear();
+            for (final Movie movie : movies) {
+                mMovieAdapter.add(movie);
+            }
+            mMovieAdapter.notifyDataSetChanged();
         }
     }
 
@@ -204,12 +242,16 @@ public class PopularMoviesFragment extends Fragment {
                 PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortType = prefs.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_default));
-        sortType = sortType.equals(getString(R.string.pref_sort_order_highest_rated_value)) ?
-                getString(R.string.pref_sort_order_highest_rated_title) :
-                getString(R.string.pref_sort_order_most_popular_title);
+        if (sortType.equals(getString(R.string.pref_sort_order_highest_rated_value))) {
+            sortType = getString(R.string.pref_sort_order_highest_rated_title);
+        } else if (sortType.equals(getString(R.string.pref_sort_order_most_popular_value))) {
+            sortType = getString(R.string.pref_sort_order_most_popular_title);
+        } else if (sortType.equals(getString(R.string.pref_sort_order_favorite_value))) {
+            sortType = getString(R.string.pref_sort_order_favorite_title);
+        }
 
-        sortType = String.format(getString(R.string.popular_movies_sort_by_type_format), sortType);
-        ((TextView) getActivity().findViewById(android.R.id.text1)).setText(sortType);
+        ((TextView) getActivity().findViewById(android.R.id.text1)).setText(
+                String.format(getString(R.string.popular_movies_sort_by_type_format), sortType));
     }
 
     /**
