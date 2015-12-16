@@ -7,7 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -39,6 +44,8 @@ public class DetailFragment extends Fragment {
     private String[] mTrailers;
     private ReviewAdapter mReviewAdapter;
     private TrailerAdapter mTrailerAdapter;
+    private ShareActionProvider mShareActionProvider;
+
 
     public static DetailFragment newInstance(final Movie movie) {
         final DetailFragment fragment = new DetailFragment();
@@ -60,6 +67,27 @@ public class DetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
         mMovie = args.getParcelable(ARG_MOVIE);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.menu_details, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        mShareActionProvider = new ShareActionProvider(getActivity());
+        final Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, "youtube");
+        mShareActionProvider.setShareIntent(intent);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     }
 
     @Override
